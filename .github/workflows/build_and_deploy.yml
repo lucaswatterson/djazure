@@ -1,0 +1,157 @@
+name: "Django on Azure Workflow"
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  TF_LOG: INFO
+  ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+  ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+  ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+  STATE_RG: ${{ secrets.STATE_RG }}
+  STATE_STORAGE_ACCOUNT: ${{ secrets.STATE_STORAGE_ACCOUNT }}
+  PROJECT_NAME: ${{ secrets.PROJECT_NAME }}
+  RESOURCE_GROUP_NAME: ${{ secrets.PROJECT_NAME }}
+
+jobs:
+
+  terraform:
+    name: "Terraform Infrastructure"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./tf
+
+    steps:
+      - name: Checkout the repository to the runner
+        uses: actions/checkout@v2
+
+      - name: Setup Terraform with specified version on the runner
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.4.2
+
+      - name: Terraform init
+        id: init
+        run: terraform init -backend-config="resource_group_name=$STATE_RG" -backend-config="storage_account_name=$STATE_STORAGE_ACCOUNT"
+
+      - name: Terraform format
+        id: fmt
+        run: terraform fmt -check
+
+      - name: Terraform validate
+        id: validate
+        run: terraform validate
+
+      - name: Terraform plan
+        id: plan
+        if: github.event_name == 'pull_request'
+        run: terraform plan -no-color -input=false
+        continue-on-error: true
+
+      - uses: actions/github-script@v6
+        if: github.event_name == 'pull_request'
+        env:
+          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+        with:
+          script: |
+            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+
+            <details><summary>Show Plan</summary>
+
+            \`\`\`\n
+            ${process.env.PLAN}
+            \`\`\`
+
+            </details>
+            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve -input=false -var="project_name=$PROJECT_NAME"
+  
+  build-and-deploy:
+    name: "Build and Deploy"
+    runs-on: ubuntu-latest
+    needs: terraform
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.10' 
+  
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: Add SQL Server Firewall Rule for GitHub Action
+      run: |
+          chmod +x ./scripts/createSqlServerFirewalRule.sh
+          ./scripts/createSqlServerFirewalRule.sh
+
+    - name: Install Microsoft ODBC Driver for SQL Server
+      run: |
+          sudo curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+          sudo sh -c 'curl https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list > /etc/apt/sources.list.d/mssql-release.list'
+          sudo apt-get update
+          sudo ACCEPT_EULA=Y apt-get install -y msodbcsql17
+          sudo apt-get install -y unixodbc-dev 
+
+    - name: Create Environment Variables from Azure Key Vault
+      run: |
+          chmod +x ./scripts/setSecretsFromKeyVault.sh.sh
+          ./scripts/setSecretsFromKeyVault.sh
+    
+    - name: Install App Requirements
+      run: pip install -r requirements.txt
+    
+    - name: Migrate
+      run: python manage.py migrate
+      env:
+        DB_NAME: ${{ env.DB_NAME }}
+        DB_USER: ${{ env.DB_USER }}
+        DB_SERVER: ${{ env.DB_SERVER }} 
+        DB_PASSWORD: ${{ env.DB_PASSWORD }}
+        DB_FQDN: ${{ env.DB_FQDN }}
+
+
+    - name: Delete SQL Server Firewall Rule for GitHub Action
+      run: |
+          chmod +x ./scripts/deleteSqlServerFirewalRule.sh
+          ./scripts/deleteSqlServerFirewalRule.sh
+
+    - uses: azure/docker-login@v1
+      with:
+        login-server: ${{ env.REGISTRY_SERVER }}
+        username: ${{ env.REGISTRY_USERNAME }}
+        password: ${{ env.REGISTRY_PASSWORD }}
+
+    - run: |
+        docker build . -t $REGISTRY_SERVER/$PROJECT_NAME:latest
+        docker push $REGISTRY_SERVER/$PROJECT_NAME:latest
