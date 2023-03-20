@@ -112,8 +112,8 @@ jobs:
     
     - name: Add SQL Server Firewall Rule for GitHub Action
       run: |
-          chmod +x ./scripts/createSqlServerFirewalRule.sh
-          ./scripts/createSqlServerFirewalRule.sh
+          chmod +x ./scripts/createSqlServerFirewallRule.sh
+          ./scripts/createSqlServerFirewallRule.sh
 
     - name: Install Microsoft ODBC Driver for SQL Server
       run: |
@@ -139,7 +139,6 @@ jobs:
         DB_SERVER: ${{ env.DB_SERVER }} 
         DB_PASSWORD: ${{ env.DB_PASSWORD }}
         DB_FQDN: ${{ env.DB_FQDN }}
-
 
     - name: Delete SQL Server Firewall Rule for GitHub Action
       run: |
