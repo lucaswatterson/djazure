@@ -125,7 +125,7 @@ jobs:
 
     - name: Create Environment Variables from Azure Key Vault
       run: |
-          chmod +x ./scripts/setSecretsFromKeyVault.sh.sh
+          chmod +x ./scripts/setSecretsFromKeyVault.sh
           ./scripts/setSecretsFromKeyVault.sh
     
     - name: Install App Requirements
