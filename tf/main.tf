@@ -259,7 +259,7 @@ resource "azurerm_app_service_source_control" "web_app_source_control" {
   app_id                 = azurerm_linux_web_app.web_app.id
   use_manual_integration = false
 
-  container_configuration {
+  container_configuration = {
     image_name        = "${azurerm_container_registry.acr.login_server}/${var.project_name}:latest"
     registry_url      = azurerm_container_registry.acr.login_server
     registry_username = azurerm_container_registry.acr.admin_username
