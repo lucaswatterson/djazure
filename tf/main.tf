@@ -241,12 +241,7 @@ resource "azurerm_linux_web_app" "web_app" {
     type = "SystemAssigned"
   }
 
-  site_config {
-    application_stack {
-      docker_image     = "${azurerm_container_registry.acr.login_server}/${var.project_name}"
-      docker_image_tag = "latest"
-    }
-  }
+  site_config {}
 
   app_settings = {
     WEBSITES_PORT          = "8000"
@@ -257,6 +252,18 @@ resource "azurerm_linux_web_app" "web_app" {
     DB_PASSWORD            = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.key_vault.name};SecretName=db-password)"
     DB_NAME                = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.key_vault.name};SecretName=db-name)"
     HOSTNAME               = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.key_vault.name};SecretName=hostname)"
+  }
+}
+
+resource "azurerm_app_service_source_control" "web_app_source_control" {
+  app_id   = azurerm_linux_web_app.web_app.id
+  use_manual_integration = false
+
+  container_configuration {
+    image_name = "${azurerm_container_registry.acr.login_server}/${var.project_name}:latest"
+    registry_url = azurerm_container_registry.acr.login_server
+    registry_username = azurerm_container_registry.acr.admin_username
+    registry_password = azurerm_container_registry.acr.admin_password
   }
 }
 
