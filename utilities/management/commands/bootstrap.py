@@ -2,6 +2,7 @@ import os
 import subprocess
 import json
 from datetime import datetime
+import fileinput
 
 from django.core.management.base import BaseCommand, CommandError
 
@@ -30,6 +31,23 @@ class Command(BaseCommand):
             superuser_password = input("\nWhat is the Super User password? ")
 
         unique_id = datetime.now().strftime("%Y%m%d%H%M%S")
+
+        # Update to Project Name
+        files = [
+            "Dockerfile",
+            "manage.py",
+            "djazure/asgi.py",
+            "djazure/urls.py",
+            "djazure/wsgi.py",
+            "djazure/settings/base.py"
+        ]
+
+        for filename in files:
+            with fileinput.FileInput(filename, inplace=True) as file:
+                for line in file:
+                    print(line.replace("djazure", project_name), end='')
+        
+        os.rename("djazure", project_name)
 
         # Login to Azure
         print("\nLogging in to Azure")
