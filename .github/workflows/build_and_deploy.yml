@@ -131,6 +131,9 @@ jobs:
     - name: Install App Requirements
       run: pip install -r requirements.txt
     
+    - name: Check Settings Fire
+      run: sed -i 's/dev/production/g' $PROJECT_NAME/settings/__init__.py
+    
     - name: Migrate
       run: python manage.py migrate
       env:
