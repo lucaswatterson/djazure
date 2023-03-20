@@ -140,6 +140,12 @@ jobs:
         DB_PASSWORD: ${{ env.DB_PASSWORD }}
         DB_FQDN: ${{ env.DB_FQDN }}
     
+    - name: Create Super User
+      run: python manage.py createsuperuser --no-input --username $DJANGO_SUPERUSER_USER
+      env:
+        DJANGO_SUPERUSER_USER: ${{ secrets.DJANGO_SUPERUSER_USER }}
+        DJANGO_SUPERUSER_PASSWORD: ${{ secrets.DJANGO_SUPERUSER_PASSWORD }}
+    
     - name: Collectstatic
       run: python manage.py collectstatic --no-input
       env:

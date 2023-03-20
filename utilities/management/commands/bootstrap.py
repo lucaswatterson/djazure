@@ -21,6 +21,12 @@ class Command(BaseCommand):
         region = input("\nWhich Azure Region do you want to deploy to? (eastus) ") or "eastus"
         region.lower()
 
+        superuser_user = input("\nWhat do you want the Super User username to be? (admin) ") or "admin"
+
+        superuser_password = ""
+        while superuser_password == "":
+            superuser_password = input("\nWhat is the Super User password? ")
+
         unique_id = datetime.now().strftime("%Y%m%d%H%M%S")
 
         # Login to Azure
@@ -146,6 +152,8 @@ class Command(BaseCommand):
             f.write(f"ARM_TENANT_ID={auth_info['tenantId']}\n")
             f.write(f"AZURE_CREDENTIALS={credentials}\n")
             f.write(f"PROJECT_NAME={project_name}\n")
+            f.write(f"DJANGO_SUPERUSER_USER={superuser_user}\n")
+            f.write(f"DJANGO_SUPERUSER_PASSWORD={superuser_password}\n")
 
         print("\nSetting GitHub Secrets")
         add_azure_credentials_github = subprocess.run(
