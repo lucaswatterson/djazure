@@ -241,7 +241,12 @@ resource "azurerm_linux_web_app" "web_app" {
     type = "SystemAssigned"
   }
 
-  site_config {}
+  site_config {
+    application_stack {
+      docker_image     = "${azurerm_container_registry.acr.login_server}/${var.project_name}"
+      docker_image_tag = "latest"
+    }
+  }
 
   app_settings = {
     WEBSITES_PORT          = "8000"
@@ -255,16 +260,9 @@ resource "azurerm_linux_web_app" "web_app" {
   }
 }
 
-resource "azurerm_app_service_source_control" "web_app_source_control" {
+resource "azurerm_app_service_source_control" "sourcecontrol" {
   app_id                 = azurerm_linux_web_app.web_app.id
   use_manual_integration = false
-
-  container_configuration = {
-    image_name        = "${azurerm_container_registry.acr.login_server}/${var.project_name}:latest"
-    registry_url      = azurerm_container_registry.acr.login_server
-    registry_username = azurerm_container_registry.acr.admin_username
-    registry_password = azurerm_container_registry.acr.admin_password
-  }
 }
 
 resource "azurerm_key_vault_secret" "hostname" {
