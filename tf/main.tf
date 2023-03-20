@@ -100,6 +100,16 @@ resource "azurerm_storage_account" "storage_account" {
   location                 = azurerm_resource_group.rg.location
   account_tier             = "Standard"
   account_replication_type = "LRS"
+
+  blob_properties {
+    cors_rule {
+      allowed_headers    = ["*"]
+      allowed_methods    = ["GET"]
+      allowed_origins    = [azurerm_linux_web_app.web_app.default_hostname]
+      exposed_headers    = ["*"]
+      max_age_in_seconds = 0
+    }
+  }
 }
 
 resource "azurerm_storage_container" "container" {
