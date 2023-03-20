@@ -142,8 +142,8 @@ jobs:
 
     - name: Delete SQL Server Firewall Rule for GitHub Action
       run: |
-          chmod +x ./scripts/deleteSqlServerFirewalRule.sh
-          ./scripts/deleteSqlServerFirewalRule.sh
+          chmod +x ./scripts/deleteSqlServerFirewallRule.sh
+          ./scripts/deleteSqlServerFirewallRule.sh
 
     - uses: azure/docker-login@v1
       with:
