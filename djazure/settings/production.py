@@ -32,4 +32,10 @@ DATABASES = {
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = "static/"
+STATICFILES_DIRS = [BASE_DIR / "static"]
+
+DEFAULT_FILE_STORAGE = "storages.backends.azure_storage.AzureStorage"
+STATICFILES_STORAGE = "storages.backends.azure_storage.AzureStorage"
+
+AZURE_CONNECTION_STRING = os.getenv("BLOB_CONNECTION_STRING")
+AZURE_CONTAINER = "files"

@@ -139,6 +139,11 @@ jobs:
         DB_SERVER: ${{ env.DB_SERVER }} 
         DB_PASSWORD: ${{ env.DB_PASSWORD }}
         DB_FQDN: ${{ env.DB_FQDN }}
+    
+    - name: Collectstatic
+      run: python manage.py collectstatic --no-input
+      env:
+        BLOB_CONNECTION_STRING: ${{ env.BLOB_CONNECTION_STRING }}
 
     - name: Delete SQL Server Firewall Rule for GitHub Action
       run: |
