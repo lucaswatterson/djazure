@@ -31,4 +31,4 @@ RUN adduser -u 5678 --disabled-password --gecos "" appuser && chown -R appuser /
 USER appuser
 
 # Start Gunicorn
-CMD ["gunicorn", "--worker-tmp-dir", "/dev/shm", "--workers=2", "--threads=4", "--worker-class=gthread", "--log-file=-", "testerino.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD ["gunicorn", "--worker-tmp-dir", "/dev/shm", "--workers=2", "--threads=4", "--worker-class=gthread", "--log-file=-", "djazure.wsgi:application", "--bind", "0.0.0.0:8000"]
