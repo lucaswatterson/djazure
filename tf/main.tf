@@ -256,12 +256,12 @@ resource "azurerm_linux_web_app" "web_app" {
 }
 
 resource "azurerm_app_service_source_control" "web_app_source_control" {
-  app_id   = azurerm_linux_web_app.web_app.id
+  app_id                 = azurerm_linux_web_app.web_app.id
   use_manual_integration = false
 
   container_configuration {
-    image_name = "${azurerm_container_registry.acr.login_server}/${var.project_name}:latest"
-    registry_url = azurerm_container_registry.acr.login_server
+    image_name        = "${azurerm_container_registry.acr.login_server}/${var.project_name}:latest"
+    registry_url      = azurerm_container_registry.acr.login_server
     registry_username = azurerm_container_registry.acr.admin_username
     registry_password = azurerm_container_registry.acr.admin_password
   }
