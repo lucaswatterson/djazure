@@ -1,0 +1,25 @@
+{% extends "layouts/app.html" %}
+
+{% load static %}
+
+{% block yield %}
+<div class="row d-flex align-items-center text-center mb-5">
+    <div class="col"></div>
+    <div class="col">
+        <img src="{% static "images/django.png" %}" class="img-fluid" />
+    </div>
+    <div class="col">
+        <i class="bi-heart-fill text-danger display-2"></i>
+    </div>
+    <div class="col">
+        <img src="{% static "images/azure.png" %}" class="img-fluid" />
+    </div>
+    <div class="col"></div>
+</div>
+
+<div class="row">
+    <div class="col text-center">
+        <a href="https://github.com/lucaswatterson/djazure" class="lead">https://github.com/lucaswatterson/djazure</a>
+    </div>
+</div>
+{% endblock %}
