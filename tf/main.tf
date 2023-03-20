@@ -30,6 +30,12 @@ resource "random_string" "unique_resource_string" {
   upper   = false
 }
 
+resource "random_string" "secret_key" {
+  length           = 50
+  special          = true
+  override_special = "!@#$%^&*(-_=+)"
+}
+
 resource "random_string" "sql_username" {
   length  = 16
   special = false
@@ -73,6 +79,16 @@ resource "azurerm_key_vault_access_policy" "tf_access_policy" {
     "Recover",
     "Backup",
     "Restore"
+  ]
+}
+
+resource "azurerm_key_vault_secret" "secret_key" {
+  name         = "secret-key"
+  value        = random_string.secret_key.id
+  key_vault_id = azurerm_key_vault.key_vault.id
+
+  depends_on = [
+    azurerm_key_vault_access_policy.tf_access_policy
   ]
 }
 
@@ -257,6 +273,7 @@ resource "azurerm_linux_web_app" "web_app" {
     DB_PASSWORD            = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.key_vault.name};SecretName=db-password)"
     DB_NAME                = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.key_vault.name};SecretName=db-name)"
     HOSTNAME               = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.key_vault.name};SecretName=hostname)"
+    SECRET_KEY             = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.key_vault.name};SecretName=secret-key)"
   }
 }
 
