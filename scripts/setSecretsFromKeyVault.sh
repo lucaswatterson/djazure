@@ -22,6 +22,7 @@ declare -A secret_mapping=(
   ["db-server"]="DB_SERVER"
   ["db-user"]="DB_USER"
   ["hostname"]="HOSTNAME"
+  ["secret-key"]="SECRET_KEY"
 )
 
 # Set the environment variables in the GitHub environment file
