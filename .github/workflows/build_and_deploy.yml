@@ -110,6 +110,11 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
     
+    - name: Set Web App CI/CD Flag to True
+      run: |
+          chmod +x ./scripts/setAppServiceCiCdFlag.sh
+          ./scripts/setAppServiceCiCdFlag.sh
+    
     - name: Add SQL Server Firewall Rule for GitHub Action
       run: |
           chmod +x ./scripts/createSqlServerFirewallRule.sh
