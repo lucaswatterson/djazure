@@ -260,11 +260,6 @@ resource "azurerm_linux_web_app" "web_app" {
   }
 }
 
-resource "azurerm_app_service_source_control" "sourcecontrol" {
-  app_id                 = azurerm_linux_web_app.web_app.id
-  use_manual_integration = false
-}
-
 resource "azurerm_key_vault_secret" "hostname" {
   name         = "hostname"
   value        = azurerm_linux_web_app.web_app.default_hostname
