@@ -39,3 +39,14 @@ STATICFILES_STORAGE = "storages.backends.azure_storage.AzureStorage"
 
 AZURE_CONNECTION_STRING = os.getenv("BLOB_CONNECTION_STRING")
 AZURE_CONTAINER = "files"
+
+
+# CORS
+
+CORS_ALLOWED_ORIGINS = [os.getenv("HOSTNAME")]
+
+CORS_ALLOW_METHODS = [
+    "GET",
+]
+
+CSRF_TRUSTED_ORIGINS = [os.getenv("HOSTNAME")]
