@@ -276,6 +276,7 @@ resource "azurerm_linux_web_app" "web_app" {
 
   app_settings = {
     WEBSITES_PORT          = "8000"
+    DOCKER_ENABLE_CI       = "true"
     BLOB_CONNECTION_STRING = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.key_vault.name};SecretName=blob-connection-string)"
     DB_FQDN                = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.key_vault.name};SecretName=db-fqdn)"
     DB_SERVER              = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.key_vault.name};SecretName=db-server)"
