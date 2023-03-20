@@ -10,6 +10,8 @@ DEBUG = False
 
 ALLOWED_HOSTS = [os.getenv("HOSTNAME")]
 
+CSRF_TRUSTED_ORIGINS = [os.getenv("HOSTNAME")]
+
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases

@@ -21,7 +21,9 @@ class Command(BaseCommand):
         region = input("\nWhich Azure Region do you want to deploy to? (eastus) ") or "eastus"
         region.lower()
 
-        superuser_user = input("\nWhat do you want the Super User username to be? (admin) ") or "admin"
+        superuser_user = (
+            input("\nWhat do you want the Super User username to be? (admin) ") or "admin"
+        )
 
         superuser_password = ""
         while superuser_password == "":
