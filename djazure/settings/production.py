@@ -10,7 +10,7 @@ DEBUG = False
 
 ALLOWED_HOSTS = [os.getenv("HOSTNAME")]
 
-CSRF_TRUSTED_ORIGINS = [os.getenv("HOSTNAME")]
+CSRF_TRUSTED_ORIGINS = [f"https://{os.getenv('HOSTNAME')}"]
 
 
 # Database
