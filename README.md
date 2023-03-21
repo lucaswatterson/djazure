@@ -18,15 +18,39 @@ This template automates the deployment of a Django application to Azure through 
 
 ## Getting Started
 
-1. To use the included dev container you will need [Visual Studio Code](https://code.visualstudio.com/download), [Docker](https://www.docker.com/products/docker-desktop/), and the [Dev Containers Extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) installed on your system.
+The basic flow for getting started with this template is detailed below.
 
-1. Create a new repository from this template by clicking the "Use this template" button in GitHub.
+### Install Dependencies
 
-1. Clone the new repo to your local system.
+The following applications are required to use this template.
 
-1. Open the repo's folder in Visual Studio Code.
+- [Visual Studio Code](https://code.visualstudio.com/download)
+- [Dev Containers Extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+- [Docker](https://www.docker.com/products/docker-desktop/)
+- [Azure Subcription ID](https://learn.microsoft.com/en-us/azure/azure-portal/get-subscription-tenant-id)
 
-1. Open the folder in the dev container.  You should receive a prompt from VS Code after opening the folder.  If not, use the green button in the bottom-left of the VS Code window.
+If you do not want to use the dev container, please see [Manual Dev Environment](#manual-dev-environment) below.
+
+### Create a Repository from the Django on Azure Template
+
+Create a new repository from this template by clicking the "Use this template" button in GitHub (above).
+
+Clone the new repo you created from the template to your client.  GitHub provides the "<> Code" button or you can learn at [Cloning a Repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository).
+
+Open the folder containing the new project in Visual Studio Code with `File -> Open Folder...`.
+
+You should receive a prompt from VS Code after opening the folder to re-open the project in its dev container.  If you do not receive the prompt, use the green `><` button in the bottom-left of the VS Code window and select `Re-open in Container`.
+
+### Use the Custome Management Commands
+
+Once the dev container starts, run the `bootstrap` Django management command as below.  The command is interactive.  You will need a project name, Azure Subscription ID, Azure Region (default provided), Superuser Username, and Superuser Password.  The command will also interactively log you in to Azure and GitHub.  The command will rename project files and folders, create Azure resources to remotely store the Terraform state, and create secrets in GitHub for use by GitHub Actions.
+
+```bash
+
+python manage.py bootstrap
+
+```
+
 
 ## Terraform Variables
 
