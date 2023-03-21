@@ -20,9 +20,9 @@ This template automates the deployment of a Django application to Azure through 
 
 The quick tutorial below will get you started with the Django on Azure template.
 
-### Install Dependencies
+### Install Client Dependencies and Collect Resources
 
-The following client applications are required to use this template.
+The following client applications and resources are required to use this template.
 
 - [Visual Studio Code](https://code.visualstudio.com/download)
 - [Dev Containers Extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
