@@ -41,15 +41,43 @@ Open the folder containing the new project in Visual Studio Code with `File -> O
 
 You should receive a prompt from VS Code after opening the folder to re-open the project in its dev container.  If you do not receive the prompt, use the green `><` button in the bottom-left of the VS Code window and select `Re-open in Container`.
 
-### Use the Custome Management Commands
+### Use the Custom Django Management Commands
 
-Once the dev container starts, run the `bootstrap` Django management command as below.  The command is interactive.  You will need a project name, Azure Subscription ID, Azure Region (default provided), Superuser Username, and Superuser Password.  The command will also interactively log you in to Azure and GitHub.  The command will rename project files and folders, create Azure resources to remotely store the Terraform state, and create secrets in GitHub for use by GitHub Actions.
+Once the dev container starts, run the `bootstrap` Django management command as below.  The command is interactive.  You will need a project name, Azure Subscription ID, Azure Region (default provided), Superuser Username, and Superuser Password.  The command will also interactively log you in to Azure and GitHub.  Once complete, `bootstrap` will have renamed project files and folders, created Azure resources to remotely store the Terraform state, and created secrets in GitHub for later use by GitHub Actions.
 
 ```bash
 
 python manage.py bootstrap
 
 ```
+
+At this time, you can also setup your dev environment by running the `create_dev_env` management command.  This command will create a `dev.env` file at the project root for use the the `dev.py` settings file.  Once `dev.env` is created you can migrate and run the development server locally.
+
+```bash
+
+python manage.py create_dev_env
+
+```
+
+### Push the Updated Repo to GitHub
+
+Once the `bootstrap` command is complete, commit and push the changes to the GitHub repo as below.  This will trigger a GitHub Action that will create and configure the required Azure resources with Terraform and build/deploy your Django project.
+
+```bash
+
+git add -A
+git commit -m "Ran Bootstrap Command"
+git push
+
+```
+
+### Verify Deployment
+
+You can check on the status of the GitHub Action by visiting your GitHub repo and selecting Actions in the top bar.  On the initial push, it will take several minutes for the GitHub Action complete because the Azure resources need to be created.  On subsequent pushes to `main`, Terraform will only make changes reflected in [tf/main.tf](./tf/main.tf).
+
+Once the GitHub Action successfully completes, navigate to the Azure Portal and find your App Service.  Find its domain on the Overview page and open it in a new browser tab.  Your App Service may show an error initially.  Don't worry, it can take several minutes after the GitHub Action completes for App Service to pull your container image from the Azure Container Registry.  Once complete, you will see the Django :heart: Azure demo page.
+
+### Develop Your Project
 
 
 ## Terraform Variables
