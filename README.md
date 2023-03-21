@@ -18,13 +18,15 @@ This template automates the deployment of a Django application to Azure through 
 
 ## Getting Started
 
-1. To use the included Devcontainer you will need [Visual Studio Code](https://code.visualstudio.com/download), [Docker](https://www.docker.com/products/docker-desktop/), and the [Dev Containers Extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) installed on your system.
+1. To use the included dev container you will need [Visual Studio Code](https://code.visualstudio.com/download), [Docker](https://www.docker.com/products/docker-desktop/), and the [Dev Containers Extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) installed on your system.
 
 1. Create a new repository from this template by clicking the button in GitHub.
 
-1. Clone your new repo to your local system.
+1. Clone the new repo to your local system.
 
-1. Open the repo in Visual Studio Code
+1. Open the repo folder in Visual Studio Code.
+
+1. Open the folder in the dev container.  You should receive a prompt from VS Code.  If not, use the green button in the bottom-left of the VS Code window.
 
 ## Terraform Variables
 
