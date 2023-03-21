@@ -14,106 +14,55 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # Get, Validate, and Transform User Input
+
         project_name = get_project_name()
-
+        print()
         subscription_id = get_subscription_id()
-
+        print()
         region = get_azure_region()
-
+        print()
         superuser_user = get_superuser_username()
-
+        print()
         superuser_password = get_superuser_password()
-
         unique_id = datetime.now().strftime("%Y%m%d%H%M%S")
+        print()
 
-        # Update to Project Name
+        # Update Project Files to Project Name
+        print("Updating Project Files to Project Name")
         update_project_files_to_project_name(project_name)
+        print()
 
         # Login to Azure
-        print("\nLogging in to Azure")
-
-        login = login_to_azure()
+        print("Logging in to Azure")
+        login_to_azure()
+        print()
 
         # Create a Service Principal
-        print("\nCreating Service Principal")
-
-        create_service_principal = create_service_principal(project_name, subscription_id)
+        print("Creating Service Principal")
+        service_principal = create_service_principal(project_name, subscription_id)
 
         # Parse the Service Principal JSON
-        credentials = create_service_principal.stdout.decode("utf-8").replace("\n", "")
+        credentials = service_principal.stdout.decode("utf-8").replace("\n", "")
         auth_info = json.loads(credentials)
 
+        print()
+
         # Create Resource Group, Storage Account, and Container for TF Satet
-        print("\nCreating Resources to Store Terraform State")
-        set_subscription = subprocess.run(
-            ["az", "account", "set", "--subscription", f"{subscription_id}"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+        print("Creating Resources to Store Terraform State")
+        set_azure_subscription(subscription_id)
+        resource_group_name = create_resource_group(project_name, region)
+        storage_account_name = create_storage_account(
+            project_name, unique_id, resource_group_name, region
         )
-
-        if set_subscription.returncode != 0:
-            raise CommandError(f"Error setting Subscription: {set_subscription.stderr.decode()}")
-
-        resource_group_name = f"{project_name}-tf-state-rg"
-        create_resource_group = subprocess.run(
-            ["az", "group", "create", "-l", f"{region}", "-n", resource_group_name],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-
-        if create_resource_group.returncode != 0:
-            raise CommandError(
-                f"Error creating Resource Group: {create_resource_group.stderr.decode()}"
-            )
-
-        storage_account_name = f"{project_name}storage{unique_id}"[:24]
-        create_storage_account = subprocess.run(
-            [
-                "az",
-                "storage",
-                "account",
-                "create",
-                "--name",
-                storage_account_name,
-                "--resource-group",
-                resource_group_name,
-                "--location",
-                region,
-                "--sku",
-                "Standard_LRS",
-            ],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-
-        if create_storage_account.returncode != 0:
-            raise CommandError(
-                f"Error creating Storage Account: {create_storage_account.stderr.decode()}"
-            )
-
-        create_container = subprocess.run(
-            [
-                "az",
-                "storage",
-                "container",
-                "create",
-                "--account-name",
-                storage_account_name,
-                "--name",
-                "state",
-            ],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-
-        if create_container.returncode != 0:
-            raise CommandError(f"Error creating Container: {create_container.stderr.decode()}")
+        create_container(storage_account_name)
+        print()
 
         # Set GitHub Secrets
-        print("\nLogging in to GitHub")
-
+        print("Logging in to GitHub")
+        print()
         os.system("gh auth login")
-
+        print()
+        print("Setting GitHub Secrets")
         with open(os.path.join(os.getcwd(), ".env"), "w") as f:
             f.write(f"STATE_RG={resource_group_name}\n")
             f.write(f"STATE_STORAGE_ACCOUNT={storage_account_name}\n")
@@ -126,7 +75,6 @@ class Command(BaseCommand):
             f.write(f"DJANGO_SUPERUSER_USER={superuser_user}\n")
             f.write(f"DJANGO_SUPERUSER_PASSWORD={superuser_password}\n")
 
-        print("\nSetting GitHub Secrets")
         add_azure_credentials_github = subprocess.run(
             ["gh", "secret", "set", "-f", ".env"],
             stdout=subprocess.PIPE,
@@ -137,6 +85,12 @@ class Command(BaseCommand):
             raise CommandError(
                 f"Error adding secrets to GitHub: {add_azure_credentials_github.stderr.decode()}"
             )
+
+        print()
+
+        print(f"{project_name} has been bootstrapped with the Django on Azure Template!")
+        print()
+        print(f"Commit the changes to your GitHub repo to trigger the GitHub Action.")
 
 
 def get_project_name():
@@ -188,7 +142,8 @@ def get_superuser_username():
 
 def get_superuser_password():
     while True:
-        superuser_password = getpass.getpass("\nWhat do you want the Superuser's password to be? ")
+        superuser_password = getpass.getpass("What do you want the Superuser's password to be? ")
+        print()
         superuser_password_confirm = getpass.getpass("Confirm the Superuser's password. ")
 
         if re.match("^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$", superuser_password):
@@ -234,7 +189,7 @@ def login_to_azure():
 
 
 def create_service_principal(project_name, subscription_id):
-    create_service_principal = subprocess.run(
+    service_principal = subprocess.run(
         [
             "az",
             "ad",
@@ -254,9 +209,79 @@ def create_service_principal(project_name, subscription_id):
         stderr=subprocess.PIPE,
     )
 
-    if create_service_principal.returncode != 0:
-        raise CommandError(
-            f"Error creating Service Principal: {create_service_principal.stderr.decode()}"
-        )
+    if service_principal.returncode != 0:
+        raise CommandError(f"Error creating Service Principal: {service_principal.stderr.decode()}")
 
-    return create_service_principal
+    return service_principal
+
+
+def set_azure_subscription(subscription_id):
+    set_subscription = subprocess.run(
+        ["az", "account", "set", "--subscription", f"{subscription_id}"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+
+    if set_subscription.returncode != 0:
+        raise CommandError(f"Error setting Subscription: {set_subscription.stderr.decode()}")
+
+
+def create_resource_group(project_name, region):
+    resource_group_name = f"{project_name}-tf-state-rg"
+    resource_group = subprocess.run(
+        ["az", "group", "create", "-l", f"{region}", "-n", resource_group_name],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+
+    if resource_group.returncode != 0:
+        raise CommandError(f"Error creating Resource Group: {resource_group.stderr.decode()}")
+
+    return resource_group_name
+
+
+def create_storage_account(project_name, unique_id, resource_group_name, region):
+    storage_account_name = f"{project_name}storage{unique_id}"[:24]
+    storage_account = subprocess.run(
+        [
+            "az",
+            "storage",
+            "account",
+            "create",
+            "--name",
+            storage_account_name,
+            "--resource-group",
+            resource_group_name,
+            "--location",
+            region,
+            "--sku",
+            "Standard_LRS",
+        ],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+
+    if storage_account.returncode != 0:
+        raise CommandError(f"Error creating Storage Account: {storage_account.stderr.decode()}")
+
+    return storage_account_name
+
+
+def create_container(storage_account_name):
+    container = subprocess.run(
+        [
+            "az",
+            "storage",
+            "container",
+            "create",
+            "--account-name",
+            storage_account_name,
+            "--name",
+            "state",
+        ],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+
+    if container.returncode != 0:
+        raise CommandError(f"Error creating Container: {container.stderr.decode()}")
