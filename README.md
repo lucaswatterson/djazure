@@ -18,11 +18,11 @@ This template automates the deployment of a Django application to Azure through 
 
 ## Getting Started
 
-The basic flow for getting started with this template is detailed below.
+The quick tutorial below will get you started with the Django on Azure template.
 
 ### Install Dependencies
 
-The following applications are required to use this template.
+The following client applications are required to use this template.
 
 - [Visual Studio Code](https://code.visualstudio.com/download)
 - [Dev Containers Extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
@@ -35,7 +35,7 @@ If you do not want to use the dev container, please see [Manual Dev Environment]
 
 Create a new repository from this template by clicking the "Use this template" button in GitHub (above).
 
-Clone the new repo you created from the template to your client.  GitHub provides the "<> Code" button or you can learn at [Cloning a Repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository).
+Clone the new repo you created from this template to your client.  GitHub provides the "<> Code" button for copy/paste commands.
 
 Open the folder containing the new project in Visual Studio Code with `File -> Open Folder...`.
 
@@ -51,7 +51,7 @@ python manage.py bootstrap
 
 ```
 
-At this time, you can also setup your dev environment by running the `create_dev_env` management command.  This command will create a `dev.env` file at the project root for use the the `dev.py` settings file.  Once `dev.env` is created you can migrate and run the development server locally.
+At this time, you can also setup your dev environment by running the `create_dev_env` management command.  This command will create a `dev.env` file at the project root for use by the `dev.py` settings file.  Once `dev.env` is created you can migrate and run the development server locally.
 
 ```bash
 
@@ -73,17 +73,27 @@ git push
 
 ### Verify Deployment
 
-You can check on the status of the GitHub Action by visiting your GitHub repo and selecting Actions in the top bar.  On the initial push, it will take several minutes for the GitHub Action complete because the Azure resources need to be created.  On subsequent pushes to `main`, Terraform will only make changes reflected in [tf/main.tf](./tf/main.tf).
+You can check on the status of the GitHub Action by visiting your GitHub repo and selecting Actions in the top bar.  On the initial push, it will take several minutes for the GitHub Action to complete because the Azure resources need to be created.  On subsequent pushes to `main`, Terraform will only make changes reflected in [tf/main.tf](./tf/main.tf).
 
-Once the GitHub Action successfully completes, navigate to the Azure Portal and find your App Service.  Find its domain on the Overview page and open it in a new browser tab.  Your App Service may show an error initially.  Don't worry, it can take several minutes after the GitHub Action completes for App Service to pull your container image from the Azure Container Registry.  Once complete, you will see the Django :heart: Azure demo page.
+Once the GitHub Action successfully completes, navigate to the Azure Portal and find your App Service.  Find its domain on the Overview page and open it in a new browser tab.  Your App Service may show an application error initially.  Don't worry, it can take several minutes after the GitHub Action completes for App Service to pull your container image from the Azure Container Registry.  Once complete, you will see the Django :heart: Azure demo page.
 
 ### Develop Your Project
 
+At this point, you can start developing your project.  Happy hacking!  Remember, using best practices for infrastructure-as-code, any changes to Azure resources should be made in [tf/main.tf](./tf/main.tf) or Terraform modules and not directly in the Azure Portal.  In addition, remember that the GitHub Action will verify the project is using `production.py` for settings, migrate the production database, collect static files, build the container image, and deploy to the Azure Container Registry.  Make any required changes in code and not directly on the production resources.
 
 ## Terraform Variables
 
+In future iterations, this project will be updated with Terraform variables to change attributes of the resources without updating [tf/main.tf](./tf/main.tf).
+
 ## Manual Dev Environment
 
-## Contributing
+If you do not want to use Docker and the dev container, the following applications are required on the client.
+
+- [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
+- [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
+- [GitHub CLI](https://cli.github.com/manual/installation)
+- [Terraform](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
 
 ## License
+
+[GNU General Public License v3.0](https://choosealicense.com/licenses/gpl-3.0/)
