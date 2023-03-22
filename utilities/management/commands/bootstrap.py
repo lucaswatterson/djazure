@@ -10,7 +10,7 @@ from django.core.management.base import BaseCommand, CommandError
 
 
 class Command(BaseCommand):
-    help = "Bootstrap a Django Project from the Django on Azure Template"
+    help = "Bootstrap a Project from the Django on Azure Template"
 
     def handle(self, *args, **options):
         # Get, Validate, and Transform User Input
@@ -37,18 +37,34 @@ class Command(BaseCommand):
         login_to_azure()
         print()
 
+        # Check if a Resource Group with the Project Name Already Exists and Prompt the User
+        cmd = f"az group list --query \"[?contains(name, '{project_name}')].name\" -o tsv"
+        rg_list_output = subprocess.check_output(cmd, shell=True, text=True)
+        rg_list_output.strip().replace("\n", "")
+
+        if rg_list_output:
+            print()
+            decision = input(
+                f"A Resource Group named {rg_list_output} already exists.  Allowing this bootstrap to finish may cause new Azure resources to be created.  Are you sure you want to continue? (y/n) "
+            )
+            decision.lower().strip().replace("\n", "")
+
+            if decision == "n":
+                return
+
         # Create a Service Principal
         print("Creating Service Principal")
         service_principal = create_service_principal(project_name, subscription_id)
 
         # Parse the Service Principal JSON
-        credentials = service_principal.stdout.decode("utf-8").replace("\n", "")
+        credentials = service_principal.stdout.decode("utf-8").strip().replace("\n", "")
         auth_info = json.loads(credentials)
 
         print()
 
         # Create Resource Group, Storage Account, and Container for TF Satet
         print("Creating Resources to Store Terraform State")
+
         set_azure_subscription(subscription_id)
         resource_group_name = create_resource_group(project_name, region)
         storage_account_name = create_storage_account(
@@ -100,7 +116,7 @@ def get_project_name():
         return project_name
 
     project_name = re.sub("[^a-z]+", "", project_name)
-    project_name = project_name.lower()
+    project_name = project_name.lower().replace("\n", "")
 
     return project_name
 
@@ -111,7 +127,7 @@ def get_subscription_id():
     while subscription_id == "":
         subscription_id = input("What is your Azure Subscription ID? ")
 
-    subscription_id = subscription_id.replace(" ", "").replace("\n", "")
+    subscription_id = subscription_id.strip().replace("\n", "")
 
     return subscription_id
 
@@ -119,8 +135,7 @@ def get_subscription_id():
 def get_azure_region():
     region = input("Which Azure Region do you want to deploy to? (eastus) ") or "eastus"
 
-    region = region.replace(" ", "").replace("\n", "")
-    region.lower()
+    region = region.lower().strip().replace("\n", "")
 
     return region
 
@@ -130,7 +145,7 @@ def get_superuser_username():
         superuser_user = (
             input("What do you want the Superuser's username to be? (admin) ") or "admin"
         )
-        superuser_user = superuser_user.lower().replace("\n", "")
+        superuser_user = superuser_user.lower().strip().replace("\n", "")
 
         if re.match("^[a-zA-Z_][a-zA-Z0-9_]*$", superuser_user):
             return superuser_user
