@@ -1,6 +1,6 @@
 # Django on Azure Template
 
-This template automates the deployment of a Django application to Azure through custom management commands, Terraform, and GitHub Actions.  The architecture diagram below details the resources deployed to Azure and the overall deployment flow.
+This template automates the deployment of a Django project to Azure through custom management commands, Terraform, and GitHub Actions.  The architecture diagram below details the resources deployed to Azure and the overall deployment flow.
 
 ![Django on Azure Architecture](./static/images/architecture.png)
 
