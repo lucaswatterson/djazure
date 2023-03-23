@@ -1,5 +1,6 @@
 import os
 import subprocess
+from subprocess import CompletedProcess
 import json
 from datetime import datetime
 import fileinput
@@ -109,7 +110,7 @@ class Command(BaseCommand):
         print(f"Commit the changes to your GitHub repo to trigger the GitHub Action.")
 
 
-def get_project_name():
+def get_project_name() -> str:
     project_name = input("What is the name of your project? (djazure) ") or "djazure"
 
     if re.match("^[a-z]*$", project_name):
@@ -121,7 +122,7 @@ def get_project_name():
     return project_name
 
 
-def get_subscription_id():
+def get_subscription_id() -> str:
     subscription_id = ""
 
     while subscription_id == "":
@@ -132,7 +133,7 @@ def get_subscription_id():
     return subscription_id
 
 
-def get_azure_region():
+def get_azure_region() -> str:
     region = input("Which Azure Region do you want to deploy to? (eastus) ") or "eastus"
 
     region = region.lower().strip().replace("\n", "")
@@ -140,7 +141,7 @@ def get_azure_region():
     return region
 
 
-def get_superuser_username():
+def get_superuser_username() -> str:
     while True:
         superuser_user = (
             input("What do you want the Superuser's username to be? (admin) ") or "admin"
@@ -155,7 +156,7 @@ def get_superuser_username():
             )
 
 
-def get_superuser_password():
+def get_superuser_password() -> str:
     while True:
         superuser_password = getpass.getpass("What do you want the Superuser's password to be? ")
         print()
@@ -172,7 +173,7 @@ def get_superuser_password():
             )
 
 
-def update_project_files_to_project_name(project_name):
+def update_project_files_to_project_name(project_name: str) -> None:
     files = [
         "Dockerfile",
         "manage.py",
@@ -190,7 +191,7 @@ def update_project_files_to_project_name(project_name):
     os.rename("djazure", project_name)
 
 
-def login_to_azure():
+def login_to_azure() -> None:
     login = subprocess.run(
         ["az", "login"],
         stdout=subprocess.PIPE,
@@ -200,10 +201,8 @@ def login_to_azure():
     if login.returncode != 0:
         raise CommandError(f"Error logging in to Azure: {login.stderr.decode()}")
 
-    return login
 
-
-def create_service_principal(project_name, subscription_id):
+def create_service_principal(project_name: str, subscription_id: str) -> CompletedProcess:
     service_principal = subprocess.run(
         [
             "az",
@@ -230,7 +229,7 @@ def create_service_principal(project_name, subscription_id):
     return service_principal
 
 
-def set_azure_subscription(subscription_id):
+def set_azure_subscription(subscription_id: str) -> None:
     set_subscription = subprocess.run(
         ["az", "account", "set", "--subscription", f"{subscription_id}"],
         stdout=subprocess.PIPE,
@@ -241,7 +240,7 @@ def set_azure_subscription(subscription_id):
         raise CommandError(f"Error setting Subscription: {set_subscription.stderr.decode()}")
 
 
-def create_resource_group(project_name, region):
+def create_resource_group(project_name: str, region: str) -> str:
     resource_group_name = f"{project_name}-tf-state-rg"
     resource_group = subprocess.run(
         ["az", "group", "create", "-l", f"{region}", "-n", resource_group_name],
@@ -255,7 +254,9 @@ def create_resource_group(project_name, region):
     return resource_group_name
 
 
-def create_storage_account(project_name, unique_id, resource_group_name, region):
+def create_storage_account(
+    project_name: str, unique_id: str, resource_group_name: str, region: str
+) -> str:
     storage_account_name = f"{project_name}storage{unique_id}"[:24]
     storage_account = subprocess.run(
         [
@@ -282,7 +283,7 @@ def create_storage_account(project_name, unique_id, resource_group_name, region)
     return storage_account_name
 
 
-def create_container(storage_account_name):
+def create_container(storage_account_name: str) -> None:
     container = subprocess.run(
         [
             "az",
